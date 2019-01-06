@@ -17,20 +17,20 @@ typedef struct char_n_addr								// Holds a character-address pair
 } char_n_addr;
 
 
-typedef struct trie_node									// Holds information related to a Trie Node.
+typedef struct trie_node								// Holds information related to a Trie Node.
 {
 	unsigned int frequency, child_count, children_size;
 	char_n_addr **children;
 } trie_node;
 
-typedef trie_node* trie;
+typedef trie_node* trie_t;
 
 
 //	============================  Functions/Operations  ============================
 
 static trie_node* create_node()							// Creates a new Trie node with the default values.
 {
-	trie_node* node = malloc(sizeof(trie_node));			// allocate space for an instance of a Trie node.
+	trie_node* node = malloc(sizeof(trie_node));		// allocate memory for an instance of a Trie node.
 
 	node->frequency = 0;								// by default, the frequency..
 	node->child_count = 0;								// ..child_count..
@@ -40,15 +40,15 @@ static trie_node* create_node()							// Creates a new Trie node with the defaul
 	return node;										// finally, the address of the new node is returned.
 }
 
-trie create_trie()										// Creates an empty trie which is nothing but a single
+trie_t create_trie()									// Creates an empty trie which is nothing but a single
 {														// node; which is called the root node.
 	return create_node();								// hence, we just call create_node() and that node 
 }														// is the root node; whose address is returned.
 
-void add_string(trie root, const char* string)			// Adds the string pointed to by "string" to the Trie pointed by "root".
+void add_string(trie_t root, const char* string)		// Adds the string pointed to by "string" to the Trie pointed by "root".
 {
 	int i;
-	trie_node* next_node = NULL;							// We need to traverse the Trie to the bottom and then add the new
+	trie_node* next_node = NULL;						// We need to traverse the Trie to the bottom and then add the new
 														// node (or increment the frequency if it is already present). Thus, 
 														// this pointer stores the next node that we need to look at. 
 
@@ -132,7 +132,7 @@ static void write_freq_worker(FILE *fout, trie_node* root, char** string, int po
 
 }
 
-void write_freq(FILE *fout, trie root)
+void write_freq(FILE *fout, trie_t root)
 {
 	char **string_ptr = malloc(sizeof(char*));
 	int var = 0, *length = &var;
@@ -145,7 +145,7 @@ void write_freq(FILE *fout, trie root)
 }
 
 
-void destroy_trie(trie root)
+void destroy_trie(trie_t root)
 {
 	if(root->child_count != 0)
 	{
