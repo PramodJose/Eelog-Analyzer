@@ -106,8 +106,9 @@ void add_string(trie_t root, const char* string)		// Adds the string pointed to 
 **
 **	The author wanted to create a dynamically allocated string which is used to contenate the characters at each trie node and would be shared by all
 **	the instances of this recursive function to reduce the number of memory allocations (which takes precious time and memory). Also, to decrease the
-**	number of reallocations, the author wanted to increase the size of the string in powers of 2; so initially the size would be 2 (one character and
-**	NULL); then if extra memory is needed, then the size is increased to 4, then 8 and so on.
+**	number of reallocations, the author wanted to increase the size of the string in powers of 2; so initially the size would be 8 (it is rare to come
+**	across strings that are less than 7 chars; note that an extra char is required to store the NULL); then if extra memory is needed, then the size
+**	is increased to 16, then 32 and so on.
 **	To achieve this, the address of the length (of the string) and the address of the string is passed among the various recursive instances.
 **	A string is a char*; so a pointer to a char* would be char**. We can think of it as a dynamic jagged array where we only use the first string, i.e.
 **	string[0] contains the intermediate string (and this is how the author dereferences the string in this function). The length's address is passed,
@@ -123,7 +124,7 @@ static void write_freq_worker(FILE *fout, trie_node* root, char** string, int po
 		int i, prev_length = *length;					// prev_length helps detect whether we need extra memory or not.
 
 		if(*length == 0)								// if *length is 0, it means that the string does not exist.
-			*length = 2;								// so, allocate 2 characters - the character itself and the NULL character.
+			*length = 8;								// so, allocate 8 characters - it is rare to have strings less than 7 chars.
 		else if (pos + 2 > *length)						// the current position + 2 indicates how many characters there would be..and if that is
 			(*length) <<= 1;							// greater than the current length, then double the length of the string.
 
