@@ -25,7 +25,7 @@ typedef struct heap_t* heap_t;
 
 //	============================  Functions/Operations  ============================
 
-static max_heap_node* create_node(const char* a_name, const unsigned int t_count)
+static max_heap_node* create_heap_node(const char* a_name, const unsigned int t_count)
 {
 	max_heap_node* node = malloc(sizeof(max_heap_node));
 
@@ -78,7 +78,7 @@ void heap_append(heap_t heap, const char* a_name, const unsigned int t_count)
 		}
 	}
 
-	heap->app_list[heap->node_count - 1] = create_node(a_name, t_count);
+	heap->app_list[heap->node_count - 1] = create_heap_node(a_name, t_count);
 }
 
 static void max_heapify(heap_t heap, long int i)
@@ -105,7 +105,7 @@ static void max_heapify(heap_t heap, long int i)
 
 static void build_max_heap(heap_t heap)
 {
-	long int non_leaf = (heap->node_count / 2) -1;
+	long int non_leaf = (heap->node_count / 2L) - 1;
 
 	while(non_leaf >= 0)
 	{
