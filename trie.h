@@ -84,7 +84,7 @@ void add_string(trie_t root, const char* string)		// Adds the string pointed to 
 		if(root->children == NULL)						// if the reallocation failed, then display an error message and quit.
 		{
 			fprintf(stderr, "Error during re-allocation in function add_recursive() in file header.h\n");
-			exit(1);
+			exit(EXIT_FAILURE);
 		}
 
 		next_node = create_node();						// the next Trie node that we need to jump to, does not exist, so create it
@@ -133,7 +133,7 @@ static void write_freq_worker(FILE *fout, trie_node* root, char** string, int po
 			if(string[0] == NULL)						// and in case reallocation was not possible, output an error message to stderr.
 			{
 				fprintf(stderr, "Error during re-allocation in function print_freq_rec() in file header.h\n");
-				exit(2);
+				exit(EXIT_FAILURE);
 			}
 		}
 
