@@ -103,7 +103,7 @@ static void max_heapify(heap_t heap, long int i)
 	}
 }
 
-void build_max_heap(heap_t heap)
+static void build_max_heap(heap_t heap)
 {
 	long int non_leaf = (heap->node_count / 2) -1;
 
@@ -121,6 +121,7 @@ void heap_extract_top(FILE *fout, heap_t heap, long int top_count)
 	if(top_count <= 0)
 		return;
 
+	build_max_heap(heap);
 	for(; top_count != 0; --top_count)
 	{
 		fprintf(fout, "%s\t\t%d\n", heap->app_list[0]->app_name, heap->app_list[0]->trackers_count);
@@ -135,7 +136,7 @@ void heap_extract_top(FILE *fout, heap_t heap, long int top_count)
 
 			max_heapify(heap, 0);
 
-			if(heap->allocated_count > DEFAULT_HEAP_SIZE && heap->node_count < heap->allocated_count / 2)
+			if(heap->allocated_count > DEFAULT_HEAP_SIZE && heap->node_count <= heap->allocated_count / 2)
 			{
 				heap->allocated_count >>= 1;
 				heap->app_list = realloc(heap->app_list, heap->allocated_count * sizeof(max_heap_node*));
