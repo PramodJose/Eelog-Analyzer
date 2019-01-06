@@ -29,7 +29,7 @@ typedef trie_node* trie_t;
 
 //	============================  Functions/Operations  ============================
 
-static trie_node* create_node()							// Creates a new Trie node with the default values.
+static trie_node* create_trie_node()							// Creates a new Trie node with the default values.
 {
 	trie_node* node = malloc(sizeof(trie_node));		// allocate memory for an instance of a Trie node.
 
@@ -43,7 +43,7 @@ static trie_node* create_node()							// Creates a new Trie node with the defaul
 
 trie_t create_trie()									// Creates an empty trie which is nothing but a single
 {														// node; which is called the root node.
-	return create_node();								// hence, we just call create_node() and that node 
+	return create_trie_node();								// hence, we just call create_node() and that node 
 }														// is the root node; whose address is returned.
 
 void add_string(trie_t root, const char* string)		// Adds the string pointed to by "string" to the Trie pointed by "root".
@@ -88,7 +88,7 @@ void add_string(trie_t root, const char* string)		// Adds the string pointed to 
 			exit(EXIT_FAILURE);
 		}
 
-		next_node = create_node();						// the next Trie node that we need to jump to, does not exist, so create it
+		next_node = create_trie_node();						// the next Trie node that we need to jump to, does not exist, so create it
 		char_n_addr_node->ch = *string;					// we assign the character
 		char_n_addr_node->addr = next_node;				// -address pair..
 		root->children[pos] = char_n_addr_node;			// and add it to the children array at the position "pos"
