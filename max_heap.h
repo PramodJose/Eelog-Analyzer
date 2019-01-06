@@ -122,9 +122,11 @@ void heap_extract_top(FILE *fout, heap_t heap, long int top_count)
 		return;
 
 	build_max_heap(heap);
+
+	fprintf(fout, "%-100s  NO. OF TRACKERS\n\n", "APPLICATION NAME");
 	for(; top_count != 0; --top_count)
 	{
-		fprintf(fout, "%s\t\t%d\n", heap->app_list[0]->app_name, heap->app_list[0]->trackers_count);
+		fprintf(fout, "%-100s  %d\n", heap->app_list[0]->app_name, heap->app_list[0]->trackers_count);
 
 		--heap->node_count;
 

@@ -118,7 +118,7 @@ void add_string(trie_t root, const char* string)		// Adds the string pointed to 
 static void write_freq_worker(FILE *fout, trie_node* root, char** string, int pos, int* length)
 {
 	if(root->frequency != 0)									// if the frequency is non-zero, it means that it is a whole word..
-		fprintf(fout, "%s\t\t%d\n", *string, root->frequency);	// hence print the string created so far and its frequency.
+		fprintf(fout, "%-50s  %d\n", *string, root->frequency);	// hence print the string created so far and its frequency.
 
 	if(root->child_count != 0)							// if the root has any children, then we proceed, else the function exits
 	{
@@ -159,6 +159,8 @@ void write_freq(FILE *fout, trie_t root)				// writes the frequency of each stri
 	int len_var = 0;									// the length is stored in a local variable of this function.
 	string_ptr[0] = NULL;								// the 0th string (as explained in the worker function description), is initialised to NULL
 
+
+	fprintf(fout, "%-50s  FREQUENCY\n\n", "TRACKER NAME");
 	write_freq_worker(fout, root, string_ptr, 0, &len_var);	// call the worker function..
 
 	free(string_ptr[0]);								// free the string..
