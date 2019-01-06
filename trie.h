@@ -6,31 +6,31 @@
 #include <stdlib.h>
 
 
-//	============================  Structs  ============================
+//	============================  Structs/Types  ============================
 
-struct TrieNode;										// Forward declaration
+struct trie_node;										// Forward declaration
 
-typedef struct char_n_addr_node							// Holds a character-address pair
+typedef struct char_n_addr								// Holds a character-address pair
 {
 	char ch;
-	struct TrieNode *addr;
+	struct trie_node *addr;
 } char_n_addr;
 
 
-typedef struct TrieNode									// Holds information related to a Trie Node.
+typedef struct trie_node									// Holds information related to a Trie Node.
 {
 	unsigned int frequency, child_count, children_size;
 	char_n_addr **children;
-} TrieNode;
+} trie_node;
 
-typedef TrieNode* Trie;
+typedef trie_node* trie;
 
 
-//	============================  Functions  ============================
+//	============================  Functions/Operations  ============================
 
-static TrieNode* create_node()							// Creates a new Trie node with the default values.
+static trie_node* create_node()							// Creates a new Trie node with the default values.
 {
-	TrieNode* node = malloc(sizeof(TrieNode));			// allocate space for an instance of a Trie node.
+	trie_node* node = malloc(sizeof(trie_node));			// allocate space for an instance of a Trie node.
 
 	node->frequency = 0;								// by default, the frequency..
 	node->child_count = 0;								// ..child_count..
@@ -40,15 +40,15 @@ static TrieNode* create_node()							// Creates a new Trie node with the default
 	return node;										// finally, the address of the new node is returned.
 }
 
-Trie create_trie()										// Creates an empty trie which is nothing but a single
+trie create_trie()										// Creates an empty trie which is nothing but a single
 {														// node; which is called the root node.
 	return create_node();								// hence, we just call create_node() and that node 
 }														// is the root node; whose address is returned.
 
-void add_string(Trie root, const char* string)			// Adds the string pointed to by "string" to the Trie pointed by "root".
+void add_string(trie root, const char* string)			// Adds the string pointed to by "string" to the Trie pointed by "root".
 {
 	int i;
-	TrieNode* next_node = NULL;							// We need to traverse the Trie to the bottom and then add the new
+	trie_node* next_node = NULL;							// We need to traverse the Trie to the bottom and then add the new
 														// node (or increment the frequency if it is already present). Thus, 
 														// this pointer stores the next node that we need to look at. 
 
@@ -97,7 +97,7 @@ void add_string(Trie root, const char* string)			// Adds the string pointed to b
 }
 
 
-static void write_freq_worker(FILE *fout, TrieNode* root, char** string, int pos, int* length)
+static void write_freq_worker(FILE *fout, trie_node* root, char** string, int pos, int* length)
 {
 	if(root->frequency != 0)
 		fprintf(fout, "%s\t\t%d\n", *string, root->frequency);
@@ -132,7 +132,7 @@ static void write_freq_worker(FILE *fout, TrieNode* root, char** string, int pos
 
 }
 
-void write_freq(FILE *fout, Trie root)
+void write_freq(FILE *fout, trie root)
 {
 	char **string_ptr = malloc(sizeof(char*));
 	int var = 0, *length = &var;
@@ -145,7 +145,7 @@ void write_freq(FILE *fout, Trie root)
 }
 
 
-void destroy_trie(Trie root)
+void destroy_trie(trie root)
 {
 	if(root->child_count != 0)
 	{
