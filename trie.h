@@ -1,9 +1,9 @@
 #ifndef _TRIE_H
 #define _TRIE_H		1
 
-#include <malloc.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <malloc.h>				// for dynamic memory allocations
+#include <stdio.h>				// for writing to streams
+#include <stdlib.h>				// for exit(), in case of abnormal conditions rearing their ugly head :P
 
 
 //	============================  Structs/Types  ============================
@@ -97,67 +97,86 @@ void add_string(trie_t root, const char* string)		// Adds the string pointed to 
 }
 
 
+/*	Purpose: Recurses through the input trie; concatenating the character at each node of the trie and writes the frequency to the output stream, fout.
+**
+**	Idea: Each recursive call to this function concatenates one character to a string. So, to create the string "ABC", 3 calls in total would be made.
+**	The position where the new character would be inserted is indicated by the parameter "pos".
+**	Say, we have two strings in the trie "AC" and "AD". The trie node "A" has two children, viz. "C" and "D". In such cases, a loop is run over all
+**	the children, and each child is appended one at a time to the position indicated by parameter "pos".
+**
+**	The author wanted to create a dynamically allocated string which is used to contenate the characters at each trie node and would be shared by all
+**	the instances of this recursive function to reduce the number of memory allocations (which takes precious time and memory). Also, to decrease the
+**	number of reallocations, the author wanted to increase the size of the string in powers of 2; so initially the size would be 2 (one character and
+**	NULL); then if extra memory is needed, then the size is increased to 4, then 8 and so on.
+**	To achieve this, the address of the length (of the string) and the address of the string is passed among the various recursive instances.
+**	A string is a char*; so a pointer to a char* would be char**. We can think of it as a dynamic jagged array where we only use the first string, i.e.
+**	string[0] contains the intermediate string (and this is how the author dereferences the string in this function). The length's address is passed,
+**	so we need int* length. This explains the parameters- char** string and int *length
+*/
 static void write_freq_worker(FILE *fout, trie_node* root, char** string, int pos, int* length)
 {
-	if(root->frequency != 0)
-		fprintf(fout, "%s\t\t%d\n", *string, root->frequency);
+	if(root->frequency != 0)									// if the frequency is non-zero, it means that it is a whole word..
+		fprintf(fout, "%s\t\t%d\n", *string, root->frequency);	// hence print the string created so far and its frequency.
 
-	if(root->child_count != 0)
+	if(root->child_count != 0)							// if the root has any children, then we proceed, else the function exits
 	{
-		int i, prev_length = *length;
+		int i, prev_length = *length;					// prev_length helps detect whether we need extra memory or not.
 
-		if(*length == 0)
-			*length = 2;
-		else if (*length < pos + 2)
-			(*length) <<= 1;
+		if(*length == 0)								// if *length is 0, it means that the string does not exist.
+			*length = 2;								// so, allocate 2 characters - the character itself and the NULL character.
+		else if (pos + 2 > *length)						// the current position + 2 indicates how many characters there would be..and if that is
+			(*length) <<= 1;							// greater than the current length, then double the length of the string.
 
-		if(prev_length != *length)
+		if(prev_length != *length)						// if more memory needs to be allocated..
 		{
-			string[0] = realloc(*string, *length);
-			if(string[0] == NULL)
+			string[0] = realloc(*string, *length * sizeof(char));	// then reallocate it..
+			if(string[0] == NULL)						// and in case reallocation was not possible, output an error message to stderr.
 			{
 				fprintf(stderr, "Error during re-allocation in function print_freq_rec() in file header.h\n");
 				exit(2);
 			}
 		}
 
-		string[0][pos + 1] = '\0';
-		for(i = 0; i < root->child_count; ++i)
+		string[0][pos + 1] = '\0';	// a character would be added at position "pos". pos + 1 should contain a NULL character to terminate the string.
+		for(i = 0; i < root->child_count; ++i)			// for each child of the current root..
 		{
-			string[0][pos] = root->children[i]->ch;
+			string[0][pos] = root->children[i]->ch;		// add the character to the appropriate position..
+
+			// and call the same function, but this time with an updated root and position. The next child is at root->children[i]->addr
 			write_freq_worker(fout, root->children[i]->addr, string, pos + 1, length);
 		}
-		string[0][pos] = '\0';
+		string[0][pos] = '\0';		// "erasing" the newly inserted character so that the previous recusive callers do not accidentally print it.
 	}
 
 }
 
-void write_freq(FILE *fout, trie_t root)
+void write_freq(FILE *fout, trie_t root)				// writes the frequency of each string in the trie to the output stream fout
 {
-	char **string_ptr = malloc(sizeof(char*));
-	int var = 0, *length = &var;
-	*string_ptr = NULL;
+	char **string_ptr = malloc(sizeof(char*));			// as explained in the function description of write_freq_worker(), we need a char**.
+														// we dynamically allocate the pointer
+	int len_var = 0;									// the length is stored in a local variable of this function.
+	string_ptr[0] = NULL;								// the 0th string (as explained in the worker function description), is initialised to NULL
 
-	write_freq_worker(fout, root, string_ptr, 0, length);
+	write_freq_worker(fout, root, string_ptr, 0, &len_var);	// call the worker function..
 
-	free(*string_ptr);
-	free(string_ptr);
+	free(string_ptr[0]);								// free the string..
+	free(string_ptr);									// and free the dynamic pointer as well.
 }
 
 
-void destroy_trie(trie_t root)
+void destroy_trie(trie_t root)							// frees memory allocated to a trie.
 {
-	if(root->child_count != 0)
+	if(root->child_count != 0)							// if the root has any children..
 	{
-		for(int i = 0; i < root->child_count; ++i)
+		for(int i = 0; i < root->child_count; ++i)		// ..then, for each child..
 		{
-			destroy_trie(root->children[i]->addr);
-			free(root->children[i]);
+			destroy_trie(root->children[i]->addr);		// ..consider the child as the next root and recursively free it..
+			free(root->children[i]);					// and free the character-address pair associated with that child.
 		}
-		free(root->children);
+		free(root->children);							// once all children are freed, free up the children array.
 	}
 
-	free(root);
+	free(root);											// lastly, destroy the root itself.
 }
 
-#endif														// trie.h included
+#endif													// trie.h included
