@@ -118,7 +118,7 @@ void heap_extract_top(FILE *fout, heap_t heap, long int top_count)
 {
 	max_heap_node* temp;
 
-	if(top_count <= 0)
+	if(top_count <= 0 || top_count > heap->node_count)
 		top_count = heap->node_count;
 
 	build_max_heap(heap);
