@@ -111,7 +111,7 @@ void add_string(trie_t root, const char* string)		// Adds the string pointed to 
 **	across strings that are less than 7 chars; note that an extra char is required to store the NULL); then if extra memory is needed, then the size
 **	is increased to 16, then 32 and so on. The macro DEFAULT_STR_SIZE defines the default string size.
 **	To achieve this, the address of the length (of the string) and the address of the string is passed among the various recursive instances.
-**	A string is a char*; so a pointer to a char* would be char**. We can think of it as a dynamic jagged array where we only use the first string, i.e.
+**	A string is a char*; so a pointer to a char* would be char**. We can think of it as a dynamic jagged 2D array where we only use the first string, i.e.
 **	string[0] contains the intermediate string (and this is how the author dereferences the string in this function). The length's address is passed,
 **	so we need int* length. This explains the parameters- char** string and int *length
 */
