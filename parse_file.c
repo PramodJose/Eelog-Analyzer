@@ -1,10 +1,10 @@
 #include <time.h>
 
 #define SPACES_TO_TRACKER_COUNT 3   // Eg: 2018-10-19 09:42:29,320:INFO:====Analysis done...found 16 trackers (There are 3 spaces to the tracker count)
-                                    // Here:        /|\                            /|\          /|\
+                                    // Here:         ^                              ^            ^
 
 #define SPACES_TO_TRACKER_NAME 2    // Eg: 2018-10-19 09:41:49,274:WARNING: - Facebook Login (There are 2 spaces to the tracker name)
-                                    // Here"        /|\                   /|\
+                                    // Here:         ^                     ^
                                     // after we see the second space, we check whether a ':'' and '-'' exists before and after it
 #define MAX_LINE_SIZE 256
 
