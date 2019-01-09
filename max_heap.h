@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#define DEFAULT_HEAP_SIZE 8
+#define DEFAULT_HEAP_SIZE 2048
 
 //	============================  Structs/Types  ============================
 
@@ -17,7 +17,7 @@ typedef struct
 
 struct heap_t
 {
-	max_heap_node** app_list;
+	max_heap_node* app_list;
 	unsigned int node_count, allocated_count;
 };
 
@@ -25,21 +25,12 @@ typedef struct heap_t* heap_t;
 
 //	============================  Functions/Operations  ============================
 
-static max_heap_node* create_heap_node(const char* a_name, const unsigned int t_count)
+static void create_heap_node(max_heap_node* app_list, const unsigned int pos, const char* a_name, const unsigned int t_count)
 {
-	max_heap_node* node = malloc(sizeof(max_heap_node));
+	app_list[pos].trackers_count = t_count;
 
-	node->trackers_count = t_count;
-	node->app_name = malloc(strlen(a_name) + 1);
-	strcpy(node->app_name, a_name);
-
-	return node;
-}
-
-static void destroy_node(max_heap_node* node)
-{
-	free(node->app_name);
-	free(node);
+	app_list[pos].app_name = malloc(strlen(a_name) + 1);
+	strcpy(app_list[pos].app_name, a_name);
 }
 
 heap_t create_heap()
@@ -56,7 +47,7 @@ heap_t create_heap()
 void destroy_heap(heap_t heap)
 {
 	for(unsigned int i = 0; i < heap->node_count; ++i)
-		destroy_node(heap->app_list[i]);
+		free(heap->app_list[i].app_name);
 	free(heap);
 }
 
@@ -66,11 +57,12 @@ void heap_append(heap_t heap, const char* a_name, const unsigned int t_count)
 
 	if(heap->node_count > heap->allocated_count)
 	{
-		if(heap->allocated_count == 0)
-			heap->allocated_count = DEFAULT_HEAP_SIZE;
-		else
+		if(heap->allocated_count != 0)
 			heap->allocated_count <<= 1;
-		heap->app_list = realloc(heap->app_list, heap->allocated_count * sizeof(max_heap_node*));
+		else
+			heap->allocated_count = DEFAULT_HEAP_SIZE;
+
+		heap->app_list = realloc(heap->app_list, heap->allocated_count * sizeof(max_heap_node));
 		if(heap->app_list == NULL)
 		{
 			fprintf(stderr, "Error during re-allocation in function heap_append() in file max_heap.h\n");
@@ -78,26 +70,31 @@ void heap_append(heap_t heap, const char* a_name, const unsigned int t_count)
 		}
 	}
 
-	heap->app_list[heap->node_count - 1] = create_heap_node(a_name, t_count);
+	create_heap_node(heap->app_list, heap->node_count - 1, a_name, t_count);
 }
 
 static void max_heapify(heap_t heap, long int i)
 {
-	long int left_child = (2 * i) + 1, right_child = (2 * i) + 2, largest;
+	long int left_child = (i << 1) | 1, right_child = left_child + 1, largest;
+	// same as: left_child = (i * 2) + 1, right_child = left_child + 1
 
-	if(left_child < heap->node_count && heap->app_list[left_child]->trackers_count > heap->app_list[i]->trackers_count)
+	if(left_child < heap->node_count && heap->app_list[left_child].trackers_count > heap->app_list[i].trackers_count)
 		largest = left_child;
 	else
 		largest = i;
 
-	if(right_child < heap->node_count && heap->app_list[right_child]->trackers_count > heap->app_list[largest]->trackers_count)
+	if(right_child < heap->node_count && heap->app_list[right_child].trackers_count > heap->app_list[largest].trackers_count)
 		largest = right_child;
 
 	if(largest != i)
 	{
-		max_heap_node* temp = heap->app_list[largest];
-		heap->app_list[largest] = heap->app_list[i];
-		heap->app_list[i] = temp;
+		char* swap_temp_str = heap->app_list[largest].app_name;
+		heap->app_list[largest].app_name = heap->app_list[i].app_name;
+		heap->app_list[i].app_name = swap_temp_str;
+
+		unsigned int swap_temp_uint = heap->app_list[largest].trackers_count;
+		heap->app_list[largest].trackers_count = heap->app_list[i].trackers_count;
+		heap->app_list[i].trackers_count = swap_temp_uint;
 
 		max_heapify(heap, largest);
 	}
@@ -105,7 +102,7 @@ static void max_heapify(heap_t heap, long int i)
 
 static void build_max_heap(heap_t heap)
 {
-	long int non_leaf = (heap->node_count / 2L) - 1;
+	long int non_leaf = ((long int)heap->node_count >> 1) - 1;
 
 	while(non_leaf >= 0)
 	{
@@ -116,8 +113,6 @@ static void build_max_heap(heap_t heap)
 
 void heap_extract_top(FILE *fout, heap_t heap, long int top_count)
 {
-	max_heap_node* temp;
-
 	if(top_count <= 0 || top_count > heap->node_count)
 		top_count = heap->node_count;
 
@@ -126,22 +121,20 @@ void heap_extract_top(FILE *fout, heap_t heap, long int top_count)
 	fprintf(fout, "%-100s  NO. OF TRACKERS\n\n", "APPLICATION NAME");
 	for(; top_count != 0; --top_count)
 	{
-		fprintf(fout, "%-100s  %d\n", heap->app_list[0]->app_name, heap->app_list[0]->trackers_count);
+		fprintf(fout, "%-100s  %d\n", heap->app_list[0].app_name, heap->app_list[0].trackers_count);
 
 		--heap->node_count;
 
 		if(heap->node_count != 0)
 		{
-			temp = heap->app_list[0];
 			heap->app_list[0] = heap->app_list[heap->node_count];
-			heap->app_list[heap->node_count] = temp;
 
 			max_heapify(heap, 0);
 
-			if(heap->allocated_count > DEFAULT_HEAP_SIZE && heap->node_count <= heap->allocated_count / 2)
+			if(heap->allocated_count > DEFAULT_HEAP_SIZE && heap->node_count <= (heap->allocated_count >> 1))
 			{
 				heap->allocated_count >>= 1;
-				heap->app_list = realloc(heap->app_list, heap->allocated_count * sizeof(max_heap_node*));
+				heap->app_list = realloc(heap->app_list, heap->allocated_count * sizeof(max_heap_node));
 			}
 		}
 	}
