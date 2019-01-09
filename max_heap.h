@@ -131,11 +131,17 @@ void heap_extract_top(FILE *fout, heap_t heap, long int top_count)
 
 			max_heapify(heap, 0);
 
+			/*	The following section can be uncommeneted if this code is used in "production".
+			**	The following code reduces the size of the heap when heap nodes are "deleted". This returns the dynamically
+			**	allocated memory back to the system, but it takes a little bit of time to allocate a new chunk of memory,
+			**	copy the required heap nodes and then unallocate the non-required memory space. It has been uncommented because
+			**	for	the current requirements, the memory is anyway de-allocated right after this function is called. Thus, we can
+			**	save a little bit of time by skipping this step.
 			if(heap->allocated_count > DEFAULT_HEAP_SIZE && heap->node_count <= (heap->allocated_count >> 1))
 			{
 				heap->allocated_count >>= 1;
 				heap->app_list = realloc(heap->app_list, heap->allocated_count * sizeof(max_heap_node));
-			}
+			}*/
 		}
 	}
 }
